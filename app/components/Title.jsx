@@ -1,17 +1,17 @@
 import {View, Text} from 'react-native';
 import React from 'react';
 
-const Title = ({text, top}) => {
+const Title = ({text, top, size}) => {
   return (
     <View>
       <Text
         style={{
           color: 'black',
-          fontSize: 15,
+          fontSize: size ? size: 15,
           textAlign: 'center',
           fontWeight: 'bold',
           textTransform: 'uppercase',
-          paddingTop: top? top: '20'
+          paddingTop: top? top: '10'
         }}>
         {text ? text : ''}
       </Text>
