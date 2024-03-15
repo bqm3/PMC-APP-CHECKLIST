@@ -1,12 +1,14 @@
 import React from 'react';
 import TabNavigation from './TabNavigation';
 import DefaultNavigation from './DefaultNavigation';
+import {Provider, useDispatch, useSelector} from 'react-redux';
 
 export default function CheckNavigation() {
-  const isUser = false;
+  const {error, user} = useSelector(state => state.authReducer);
+ 
   return (
     <>
-      {isUser ? (
+      {user && error === false ? (
         <>
           <TabNavigation />
         </>

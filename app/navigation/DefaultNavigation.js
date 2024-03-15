@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React, { useEffect, useState } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import OnBoardingScreen from '../screens/OnBoardingScreen';
@@ -27,22 +27,18 @@ const DefaultNavigation = () => {
       <Stack.Navigator>
         {isFirstLaunch == false && (
           <Stack.Screen
-            options={{headerShown: false}}
+            options={{ headerShown: false }}
             name="OnboardingScreen"
             component={OnBoardingScreen}
           />
         )}
 
         <Stack.Screen
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
           name="LoginScreen"
           component={LoginScreen}
         />
-        {/* <Stack.Screen
-          options={{headerShown: false}}
-          name="SignUp"
-          component={SignUpScreen}
-        /> */}
+       
       </Stack.Navigator>
     </>
   );

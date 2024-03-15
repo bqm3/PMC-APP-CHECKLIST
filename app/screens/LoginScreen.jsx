@@ -10,12 +10,14 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
-import {Dropdown} from 'react-native-element-dropdown';
-import React, {useEffect, useState, useRef} from 'react';
-import SelectDropdown from 'react-native-select-dropdown';
+import React, {useEffect, useState, useContext} from 'react';
+import {Provider, useDispatch, useSelector} from 'react-redux';
+import {login} from '../redux/actions/authActions';
 import {COLORS, SIZES} from '../constants/theme';
 import Title from '../components/Title';
 import ButtonSubmit from '../components/ButtonSubmit';
+
+import UserContext from '../context/UserContext';
 
 const HideKeyboard = ({children}) => (
   <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -23,95 +25,63 @@ const HideKeyboard = ({children}) => (
   </TouchableWithoutFeedback>
 );
 
-const dataList = [
-  {label: 'Item 1', value: '1'},
-  {label: 'Item 2', value: '2'},
-  {label: 'Item 3', value: '3'},
-  {label: 'Item 4', value: '4'},
-  {label: 'Item 5', value: '5'},
-  {label: 'Item 6', value: '6'},
-  {label: 'Item 7', value: '7'},
-  {label: 'Item 8', value: '8'},
-];
-
 const LoginScreen = ({navigation}) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const [value, setValue] = useState();
-  const ref = useRef(null);
+  const dispatch = useDispatch();
+
+  const {userData, saveUser} = useContext(UserContext);
+  const {error, isLoading, user} = useSelector(state => state.authReducer);
+
+  const [show, setShow] = useState(false);
+  const [navigationNext, setNavigationNext] = useState({
+    path: '',
+    check: true,
+  });
   const [data, setData] = useState({
-    email: "",
-    password: "",
-    check_textInputChange: false,
-    secureTextEntry: true,
-    isValidUser: true,
-    isValidPassword: true,
+    UserName: '',
+    Password: '',
+    Emails: '',
+    Duan: '',
   });
 
-  const textInputChange = (val) => {
-    const emailPattern = /\S+@\S+\.\S+/; // Pattern đơn giản cho địa chỉ email
-
-    if (emailPattern.test(val)) {
-      setData({
-        ...data,
-        email: val,
-        check_textInputChange: true,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        email: val,
-        check_textInputChange: false,
-        isValidUser: false,
-      });
-    }
+  const handleSubmit = async () => {
+    dispatch(login(data.UserName, data.Password));
   };
 
-  const handlePasswordChange = (val) => {
-    if (val.trim().length >= 3) {
+  useEffect(() => {
+    if (user && error === false) {
       setData({
         ...data,
-        password: val,
-        isValidPassword: true,
+        UserName: user.UserName,
+        Emails: user.Emails,
+        Duan: user?.ent_duan?.Duan
       });
-    } else {
+      saveUser(user);
+    }else  if(user === null && error === true){
+      Alert.alert('PMC Thông báo', 'Sai tên đăng nhập hoặc mật khẩu', [
+       
+        {
+          text: 'Hủy',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'Xác nhận', onPress: () => console.log('OK Pressed')},
+      ]);
       setData({
         ...data,
-        password: val,
-        isValidPassword: false,
+        UserName: data.UserName,
+        Password: data.Password,
+        Emails: "",
+        Duan: ""
       });
     }
-  };
+  }, [user, error]);
 
-  const updateSecureTextEntry = () => {
-    setData({
+  const handleChangeText = (key, value) => {
+    setData(data => ({
       ...data,
-      secureTextEntry: !data.secureTextEntry,
-    });
-  };
-
-  const handleValidUser = (val) => {
-    const emailPattern = /\S+@\S+\.\S+/; // Pattern đơn giản cho địa chỉ email
-
-    if (emailPattern.test(val)) {
-      setData({
-        ...data,
-        isValidUser: true,
-      });
-    } else {
-      setData({
-        ...data,
-        isValidUser: false,
-      });
-    }
-  };
-
-  const renderItem = item => {
-    return (
-      <View style={styles.item}>
-        <Text style={styles.textItem}>{item.label}</Text>
-      </View>
-    );
+      [key]: value,
+    }));
   };
 
   useEffect(() => {
@@ -158,8 +128,10 @@ const LoginScreen = ({navigation}) => {
                     placeholderTextColor="#666666"
                     style={[styles.textInput]}
                     autoCapitalize="none"
-                    onChangeText={(val) => textInputChange(val)}
-                    onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
+                    value={data.UserName ? data.UserName : user?.UserName}
+                    onChangeText={val =>
+                      handleChangeText('UserName', val)
+                    }
                   />
                 </View>
 
@@ -169,8 +141,12 @@ const LoginScreen = ({navigation}) => {
                     placeholderTextColor="#666666"
                     style={[styles.textInput]}
                     autoCapitalize="none"
-                    onChangeText={(val) => handlePasswordChange(val)}
-                    secureTextEntry={data?.secureTextEntry ? true : false}
+                    value={data.Password}
+                    onChangeText={val =>
+                      handleChangeText('Password', val)
+                    }
+                    secureTextEntry={!show}
+                    // onSubmitEditing={()=>handleSubmit()}
                   />
                   <TouchableOpacity
                     style={{
@@ -179,9 +155,8 @@ const LoginScreen = ({navigation}) => {
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}
-                    onPress={updateSecureTextEntry}
-                    >
-                    {data?.secureTextEntry ? (
+                    onPress={() => setShow(!show)}>
+                    {show ? (
                       <Image
                         style={{
                           width: 20,
@@ -205,16 +180,29 @@ const LoginScreen = ({navigation}) => {
 
                 <View style={styles.action}>
                   <TextInput
-                    placeholder="Nhập email"
+                    placeholder="Email cá nhân"
+                    value={data.Emails}
+                    editable={false}
+                    selectTextOnFocus={false}
                     placeholderTextColor="#666666"
                     style={[styles.textInput]}
                     autoCapitalize="none"
-                    // onChangeText={(val) => textInputChange(val)}
-                    // onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
                   />
                 </View>
 
-                <Dropdown
+                <View style={styles.action}>
+                  <TextInput
+                    placeholder="Dự án tham dự"
+                    value={data.Duan}
+                    editable={false}
+                    selectTextOnFocus={false}
+                    placeholderTextColor="#666666"
+                    style={[styles.textInput]}
+                    autoCapitalize="none"
+                  />
+                </View>
+
+                {/* <Dropdown
                   ref={ref}
                   style={styles.dropdown}
                   placeholderStyle={styles.placeholderStyle}
@@ -251,10 +239,15 @@ const LoginScreen = ({navigation}) => {
                   }}
                   //   renderLeftIcon={() => (
                   //   )}
-                />
+                /> */}
 
                 <View style={{height: 20}} />
-                <ButtonSubmit text={'Đăng Nhập'} onPress={() => {}} />
+                <ButtonSubmit
+                  text={'Đăng Nhập'}
+                  // navigationNext={navigationNext}
+                  isLoading={isLoading}
+                  onPress={() => handleSubmit()}
+                />
               </View>
             </View>
           </View>
