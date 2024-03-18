@@ -33,10 +33,7 @@ const LoginScreen = ({navigation}) => {
   const {error, isLoading, user} = useSelector(state => state.authReducer);
 
   const [show, setShow] = useState(false);
-  const [navigationNext, setNavigationNext] = useState({
-    path: '',
-    check: true,
-  });
+  
   const [data, setData] = useState({
     UserName: '',
     Password: '',

@@ -6,6 +6,7 @@ import {store} from './app/redux/store';
 import {ThemeProvider} from './app/context/ThemeContext';
 import {UserProvider} from './app/context/UserContext';
 import CheckNavigation from './app/navigation/CheckNavigation';
+require("moment/locale/vi");
 
 export default function App() {
   return (

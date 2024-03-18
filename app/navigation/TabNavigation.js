@@ -36,15 +36,13 @@ const HomeStack = () => {
       <Stack.Screen
         name="Thực hiện Check list"
         component={ThucHienChecklist}
-        // lazy={false}
+        lazy={false}
         options={({route}) => ({
           headerShown: true,
-          headerStyle: {
-            // backgroundColor: COLORS.bg_main,
-          },
+          
           headerTitle: () => (
             <Text style={{fontSize: 20, fontWeight: '700', color: 'black'}}>
-              CHECKLIST
+              Thực hiện Checklist
             </Text>
           ),
           headerTitleAlign: 'center',
